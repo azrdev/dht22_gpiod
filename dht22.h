@@ -129,17 +129,15 @@ DHT22_RC dht22_read(struct gpiod_line *line, float *temperature, float *humidity
     }
 
     // Calculate final values
-    if( data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF)){
-        *humidity = (data[0] * 256 + data[1]) / 10.0f;
-        *temperature = ((data[2] & 0x7F) * 256 + data[3]) / 10.0f;
-        if( data[2] & 0x80 ){
-            *temperature *= -1.0f;
-        }
-    }
-    else{
+    if( data[4] != ((data[0] + data[1] + data[2] + data[3]) & 0xFF)){
         return DHT22_CHECKSUM_FAIL;
     }
 
+    *humidity = (data[0] * 256 + data[1]) / 10.0f;
+    *temperature = ((data[2] & 0x7F) * 256 + data[3]) / 10.0f;
+    if( data[2] & 0x80 ){
+        *temperature *= -1.0f;
+    }
     return DHT22_SUCCESS;
 }
 

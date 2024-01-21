@@ -38,24 +38,26 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
+    // kernel/gpiod use "BCM" pin numbering
     line = gpiod_chip_get_line(chip, gpio);
     if (!line) {
         gpiod_chip_close(chip);
         return -1;
     }
 
-    /* Continuously get the temperature and humidity */
-    while(1){
+    /* read the sensor */
+    const size_t retries = 5;
+    DHT22_RC rc;
+    for(size_t i = 0; ++i; i < retries) {
         float temp;
         float hum;
-        /* All you need to read the sensor */
-        DHT22_RC rc = dht22_read(line, &temp, &hum);
+        rc = dht22_read(line, &temp, &hum);
         if(rc == DHT22_SUCCESS) {
-            printf("temperature=%2.2f humidity=%2.2f\n", temp, hum);
+            printf("temperature=%2.2f,humidity=%2.2f\n", temp, hum);
+            return 0;
         } else {
-            fprintf(stderr, "RC: %16s\n", dht22_rc_to_str(rc));
+            fprintf(stderr, "Error reading measurement: %16s\n", dht22_rc_to_str(rc));
         }
-        sleep(3);
     }
-
+    return rc;
 }
